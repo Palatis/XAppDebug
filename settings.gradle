@@ -1,0 +1,2 @@
+rootProject.name='XAppDebug'
+include ':app'

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">讓我抓蟲</string>
+    <string name="app_xposed_description">讓你想抵霸誰就抵霸誰！</string>
+
+    <string name="title_activity_main">@string/app_name</string>
+    <string name="navigation_drawer_open">打開側邊欄</string>
+    <string name="navigation_drawer_close">關閉側邊欄</string>
+    <string name="nav_header_title">@string/app_name</string>
+    <string name="nav_header_subtitle">@string/app_xposed_description</string>
+    <string name="nav_header_desc">側邊欄標題</string>
+
+    <string name="menu_apps">應用程式</string>
+    <string name="menu_about">關於</string>
+
+    <string name="action_search">搜尋</string>
+    <string name="action_refresh">重新整理</string>
+    <string name="action_view_options">檢視選項</string>
+    <string name="action_title_sorting">排序</string>
+    <string name="action_sort_label">應用程式標題</string>
+    <string name="action_sort_package_name">套件名稱</string>
+    <string name="action_sort_install_time">安裝時間</string>
+    <string name="action_sort_update_time">最後更新時間</string>
+    <string name="action_title_options">選項</string>
+    <string name="action_debuggable_first">可除錯優先</string>
+    <string name="action_show_system">顯示系統應用</string>
+
+    <string name="restart_required">重啟該應用程式套用變更！</string>
+    <string name="dismiss">朕知道了！</string>
+
+    <string name="xposed_version">Xposed 版本：%d</string>
+    <string name="xposed_not_found">Xposed 框架未啟用</string>
+    <string name="visit_github">GitHub</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">XAppDebug</string>
+    <string name="app_xposed_description">Make the apps you want to debug debuggable</string>
+
+    <string name="title_activity_main">@string/app_name</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">@string/app_name</string>
+    <string name="nav_header_subtitle">@string/app_xposed_description</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <string name="menu_apps">Apps</string>
+    <string name="menu_about">About</string>
+
+    <string name="action_search">Search</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_view_options">View Options</string>
+    <string name="action_title_sorting">Sorting</string>
+    <string name="action_sort_label">Application label</string>
+    <string name="action_sort_package_name">Package name</string>
+    <string name="action_sort_install_time">Install time</string>
+    <string name="action_sort_update_time">Update time</string>
+    <string name="action_title_options">Options</string>
+    <string name="action_debuggable_first">Show debuggable first</string>
+    <string name="action_show_system">Show System</string>
+
+    <string name="restart_required">Restart the app to take effect!</string>
+    <string name="dismiss">Dismiss!</string>
+
+    <string name="xposed_version">Xposed version: %d</string>
+    <string name="xposed_not_found">Xposed framework is inactive.</string>
+    <string name="visit_github">GitHub</string>
+
+    <string name="url_project_page" translatable="false">https://github.com/Palatis/AppDebuggable</string>
+</resources>
