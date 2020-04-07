@@ -10,7 +10,7 @@ import java.util.Locale;
 
 import static tw.idv.palatis.xappdebug.Constants.CONFIG_PATH_FORMAT;
 
-public class Configuration {
+public final class Configuration {
     private Configuration() {
     }
 

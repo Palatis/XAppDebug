@@ -1,8 +1,10 @@
 package tw.idv.palatis.xappdebug.ui;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,8 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,6 +22,8 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.collection.SparseArrayCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -288,9 +290,9 @@ public class AppsFragment extends Fragment {
 
         private class ViewHolder extends RecyclerView.ViewHolder {
             private final AppCompatImageView icon;
-            private final MaterialTextView applicationLabel;
-            private final MaterialTextView packageName;
-            private final SwitchMaterial toggle;
+            private final AppCompatTextView applicationLabel;
+            private final AppCompatTextView packageName;
+            private final SwitchCompat toggle;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -317,10 +319,9 @@ public class AppsFragment extends Fragment {
                     snackbar.show();
                 });
 
-                if (pkg.isSystemApp())
-                    itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.material_on_primary_emphasis_high_type, itemView.getContext().getTheme()));
-                else
-                    itemView.setBackgroundColor(itemView.getContext().getResources().getColor(android.R.color.transparent, itemView.getContext().getTheme()));
+                final Context context = itemView.getContext();
+                final Resources resources = context.getResources();
+                itemView.setBackgroundColor(resources.getColor(pkg.isSystemApp() ? R.color.highlight : R.color.transparent, context.getTheme()));
             }
         }
     }
