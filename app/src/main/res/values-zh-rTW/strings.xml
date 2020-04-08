@@ -28,6 +28,7 @@
     <string name="restart_required">重啟該應用程式套用變更！</string>
     <string name="dismiss">朕知道了！</string>
 
+    <string name="app_version">版本：%s</string>
     <string name="xposed_version">Xposed 版本：%d</string>
     <string name="xposed_not_found">Xposed 框架未啟用</string>
     <string name="visit_github">GitHub</string>

@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import tw.idv.palatis.xappdebug.R;
 
+import static tw.idv.palatis.xappdebug.BuildConfig.VERSION_NAME;
 import static tw.idv.palatis.xappdebug.Constants.LOG_TAG;
 
 public class AboutFragment extends Fragment {
@@ -29,6 +30,9 @@ public class AboutFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_about, container, false);
         final Button button = root.findViewById(R.id.github);
         button.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_project_page)))));
+
+        final TextView version = root.findViewById(R.id.version);
+        version.setText(getString(R.string.app_version, VERSION_NAME));
 
         int xposed = getActiveXposedVersion();
         if (xposed != -1) {
