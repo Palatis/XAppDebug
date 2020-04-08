@@ -2,6 +2,7 @@ package tw.idv.palatis.xappdebug.xposed;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageInfo;
+import android.os.StrictMode;
 import android.os.UserHandle;
 
 import java.util.Locale;
@@ -82,7 +83,11 @@ public class HookMain implements IXposedHookLoadPackage {
                 CONFIG_PATH_FORMAT,
                 user, packageName
         );
-        return SELinuxHelper.getAppDataFileService().checkFileExists(path);
+
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        boolean state = SELinuxHelper.getAppDataFileService().checkFileExists(path);
+        StrictMode.setThreadPolicy(oldPolicy);
+        return state;
     }
 
 }
