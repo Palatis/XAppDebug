@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.collection.SparseArrayCompat;
 import androidx.fragment.app.Fragment;
@@ -46,6 +48,7 @@ public class AppsFragment extends Fragment {
 
     private AppsViewModel mAppsViewModel;
     private SharedPreferences mSharedPreferences;
+    private InstalledPackageAdapter mAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
@@ -53,13 +56,13 @@ public class AppsFragment extends Fragment {
 
         mAppsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
         final View root = inflater.inflate(R.layout.fragment_apps, container, false);
-        final InstalledPackageAdapter adapter = new InstalledPackageAdapter();
         final RecyclerView packages = root.findViewById(R.id.packages);
-        packages.setAdapter(adapter);
+        mAdapter = new InstalledPackageAdapter();
+        packages.setAdapter(mAdapter);
 
         mAppsViewModel.getInstalledPackages().observe(
                 getViewLifecycleOwner(),
-                adapter::updateInstalledPackages
+                mAdapter::updateInstalledPackages
         );
         mAppsViewModel.updatePackageList(requireContext());
         return root;
@@ -69,6 +72,20 @@ public class AppsFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.apps, menu);
+        final SearchView search = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mAdapter.setFilterQuery(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mAdapter.setFilterQuery(newText);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -190,6 +207,7 @@ public class AppsFragment extends Fragment {
 
         private List<PackageInfoCache> mInstalledPackages = new ArrayList<>();
         private List<PackageInfoCache> mFilteredPackages = new ArrayList<>();
+        private String mFilterQuery = "";
 
         InstalledPackageAdapter() {
             setHasStableIds(true);
@@ -245,15 +263,40 @@ public class AppsFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        public void setFilterQuery(String query) {
+            mFilterQuery = query;
+            filterAndSort();
+            notifyDataSetChanged();
+        }
+
+        private List<PackageInfoCache> filterSystem(List<PackageInfoCache> target) {
+            if (mSharedPreferences.getBoolean(PREF_KEY_SHOW_SYSTEM, false))
+                return target;
+
+            final List<PackageInfoCache> filtered = new ArrayList<>(target.size());
+            for (final PackageInfoCache pkg : target)
+                if (!pkg.isSystemApp())
+                    filtered.add(pkg);
+            return filtered;
+        }
+
+        private List<PackageInfoCache> filterQuery(List<PackageInfoCache> target) {
+            if (TextUtils.isEmpty(mFilterQuery))
+                return target;
+
+            final PackageManager pm = requireContext().getPackageManager();
+            final List<PackageInfoCache> filtered = new ArrayList<>(target.size());
+            for (final PackageInfoCache pkg : target)
+                if (pkg.getLabel(pm).toString().toLowerCase().contains(mFilterQuery) ||
+                        pkg.getPackageName().toLowerCase().contains(mFilterQuery))
+                    filtered.add(pkg);
+            return filtered;
+        }
+
         private void filterAndSort() {
-            mFilteredPackages.clear();
-            if (mSharedPreferences.getBoolean(PREF_KEY_SHOW_SYSTEM, false)) {
-                mFilteredPackages.addAll(mInstalledPackages);
-            } else {
-                for (PackageInfoCache pkg : mInstalledPackages)
-                    if (!pkg.isSystemApp())
-                        mFilteredPackages.add(pkg);
-            }
+            List<PackageInfoCache> filtered;
+            filtered = filterSystem(mInstalledPackages);
+            filtered = filterQuery(filtered);
 
             final PackageManager pm = requireContext().getPackageManager();
             Comparator<PackageInfoCache> orderComparator = null;
@@ -282,10 +325,13 @@ public class AppsFragment extends Fragment {
                         return -1;
                     return 0;
                 };
-                mFilteredPackages.sort(debuggableComparator.reversed().thenComparing(orderComparator));
+                filtered.sort(debuggableComparator.reversed().thenComparing(orderComparator));
             } else {
-                mFilteredPackages.sort(orderComparator);
+                filtered.sort(orderComparator);
             }
+
+            mFilteredPackages.clear();
+            mFilteredPackages.addAll(filtered);
         }
 
         private class ViewHolder extends RecyclerView.ViewHolder {
