@@ -10,13 +10,13 @@ android {
         }
     }
 
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "tw.idv.palatis.xappdebug"
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 100002
         versionName "1.0.2"
 
