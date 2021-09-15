@@ -23,7 +23,8 @@
     <string name="action_sort_update_time">Update time</string>
     <string name="action_title_options">Options</string>
     <string name="action_debuggable_first">Show debuggable first</string>
-    <string name="action_show_system">Show System</string>
+    <string name="action_show_system">Show System Apps</string>
+    <string name="action_show_debug">Show Already Debuggable Apps</string>
 
     <string name="restart_required">Restart the app to take effect!</string>
     <string name="dismiss">Dismiss!</string>

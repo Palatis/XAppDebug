@@ -1,10 +1,22 @@
 package tw.idv.palatis.xappdebug.ui;
 
+import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+import static com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT;
+import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SHOW_DEBUG;
+import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SHOW_DEBUGGABLE_FIRST;
+import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SHOW_SYSTEM;
+import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SORT_ORDER;
+import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_INSTALL_TIME;
+import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_LABEL;
+import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_PACKAGE_NAME;
+import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_UPDATE_TIME;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,12 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -31,18 +38,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import tw.idv.palatis.xappdebug.Configuration;
 import tw.idv.palatis.xappdebug.R;
-
-import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
-import static com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT;
-import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SHOW_DEBUGGABLE_FIRST;
-import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SHOW_SYSTEM;
-import static tw.idv.palatis.xappdebug.Constants.PREF_KEY_SORT_ORDER;
-import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_INSTALL_TIME;
-import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_LABEL;
-import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_PACKAGE_NAME;
-import static tw.idv.palatis.xappdebug.Constants.SORT_ORDER_UPDATE_TIME;
 
 public class AppsFragment extends Fragment {
 
@@ -57,7 +61,7 @@ public class AppsFragment extends Fragment {
         mAppsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
         final View root = inflater.inflate(R.layout.fragment_apps, container, false);
         final RecyclerView packages = root.findViewById(R.id.packages);
-        mAdapter = new InstalledPackageAdapter();
+        mAdapter = new InstalledPackageAdapter(requireContext().getPackageManager(), mSharedPreferences);
         packages.setAdapter(mAdapter);
 
         mAppsViewModel.getInstalledPackages().observe(
@@ -108,6 +112,8 @@ public class AppsFragment extends Fragment {
                 .setChecked(mSharedPreferences.getBoolean(PREF_KEY_SHOW_DEBUGGABLE_FIRST, false));
         menu.findItem(R.id.action_show_system)
                 .setChecked(mSharedPreferences.getBoolean(PREF_KEY_SHOW_SYSTEM, false));
+        menu.findItem(R.id.action_show_debug)
+                .setChecked(mSharedPreferences.getBoolean(PREF_KEY_SHOW_DEBUG, false));
     }
 
     @Override
@@ -144,12 +150,17 @@ public class AppsFragment extends Fragment {
                         .apply();
                 requireActivity().invalidateOptionsMenu();
                 return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            case R.id.action_show_debug:
+                mSharedPreferences.edit()
+                        .putBoolean(PREF_KEY_SHOW_DEBUG, !mSharedPreferences.getBoolean(PREF_KEY_SHOW_DEBUG, false))
+                        .apply();
+                requireActivity().invalidateOptionsMenu();
+                return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
-    private class InstalledPackageAdapter extends RecyclerView.Adapter<InstalledPackageAdapter.ViewHolder>
+    private static class InstalledPackageAdapter extends RecyclerView.Adapter<InstalledPackageAdapter.ViewHolder>
             implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -163,60 +174,74 @@ public class AppsFragment extends Fragment {
             }
         }
 
-        private class PackageInfoCache {
-            public PackageInfo raw;
+        private static class PackageInfoCache {
+            public PackageInfo pkg;
+
             private CharSequence mLabel = null;
             private Drawable mIcon = null;
 
             public PackageInfoCache(PackageInfo pkg) {
-                raw = pkg;
+                this.pkg = pkg;
             }
 
             public Drawable getIcon(final PackageManager pm) {
                 if (mIcon == null)
-                    mIcon = pm.getApplicationIcon(raw.applicationInfo);
+                    mIcon = pm.getApplicationIcon(pkg.applicationInfo);
                 return mIcon;
             }
 
             public CharSequence getLabel(final PackageManager pm) {
                 if (mLabel == null)
-                    mLabel = pm.getApplicationLabel(raw.applicationInfo);
+                    mLabel = pm.getApplicationLabel(pkg.applicationInfo);
                 return mLabel;
             }
 
             public String getPackageName() {
-                return raw.packageName;
+                return pkg.packageName;
+            }
+
+            public boolean hasFlag(int flag) {
+                return (pkg.applicationInfo.flags & flag) == flag;
+            }
+
+            public boolean isDebugApp() {
+                return hasFlag(FLAG_DEBUGGABLE);
+            }
+
+            public boolean isSystemApp() {
+                return hasFlag(FLAG_SYSTEM);
             }
 
             public boolean isDebuggable() {
                 return Configuration.isEnabled(getPackageName());
             }
 
-            public boolean isSystemApp() {
-                return (raw.applicationInfo.flags & FLAG_SYSTEM) == FLAG_SYSTEM;
-            }
-
             public long getInstallTime() {
-                return raw.firstInstallTime;
+                return pkg.firstInstallTime;
             }
 
             public long getUpdateTime() {
-                return raw.lastUpdateTime;
+                return pkg.lastUpdateTime;
             }
         }
 
+        private final SharedPreferences mSharedPreferences;
+        private final PackageManager mPackageManager;
         private List<PackageInfoCache> mInstalledPackages = new ArrayList<>();
-        private List<PackageInfoCache> mFilteredPackages = new ArrayList<>();
+        private final List<PackageInfoCache> mFilteredPackages = new ArrayList<>();
         private String mFilterQuery = "";
 
-        InstalledPackageAdapter() {
+        InstalledPackageAdapter(PackageManager pkgMgr, SharedPreferences prefs) {
+            mPackageManager = pkgMgr;
+            mSharedPreferences = prefs;
             setHasStableIds(true);
         }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_app, parent, false);
+            final Context context = parent.getContext();
+            final View view = LayoutInflater.from(context).inflate(R.layout.item_app, parent, false);
             return new ViewHolder(view);
         }
 
@@ -251,11 +276,11 @@ public class AppsFragment extends Fragment {
                 map.put(pkg.getPackageName().hashCode(), pkg);
 
             mInstalledPackages = new ArrayList<>(packages.size());
-            for (PackageInfo pkg : packages) {
-                final PackageInfoCache pkg2 = map.containsKey(pkg.packageName.hashCode()) ?
-                        map.get(pkg.packageName.hashCode()) :
-                        new PackageInfoCache(pkg);
-                pkg2.raw = pkg;
+            for (PackageInfo pkg1 : packages) {
+                final PackageInfoCache pkg2 = map.containsKey(pkg1.packageName.hashCode()) ?
+                        map.get(pkg1.packageName.hashCode()) :
+                        new PackageInfoCache(pkg1);
+                pkg2.pkg = pkg1;
                 mInstalledPackages.add(pkg2);
             }
 
@@ -280,14 +305,24 @@ public class AppsFragment extends Fragment {
             return filtered;
         }
 
+        private List<PackageInfoCache> filterDebuggable(List<PackageInfoCache> target) {
+            if (mSharedPreferences.getBoolean(PREF_KEY_SHOW_DEBUG, false))
+                return target;
+
+            final List<PackageInfoCache> filtered = new ArrayList<>(target.size());
+            for (final PackageInfoCache pkg : target)
+                if (!pkg.isDebugApp())
+                    filtered.add(pkg);
+            return filtered;
+        }
+
         private List<PackageInfoCache> filterQuery(List<PackageInfoCache> target) {
             if (TextUtils.isEmpty(mFilterQuery))
                 return target;
 
-            final PackageManager pm = requireContext().getPackageManager();
             final List<PackageInfoCache> filtered = new ArrayList<>(target.size());
             for (final PackageInfoCache pkg : target)
-                if (pkg.getLabel(pm).toString().toLowerCase().contains(mFilterQuery) ||
+                if (pkg.getLabel(mPackageManager).toString().toLowerCase().contains(mFilterQuery) ||
                         pkg.getPackageName().toLowerCase().contains(mFilterQuery))
                     filtered.add(pkg);
             return filtered;
@@ -296,24 +331,22 @@ public class AppsFragment extends Fragment {
         private void filterAndSort() {
             List<PackageInfoCache> filtered;
             filtered = filterSystem(mInstalledPackages);
+            filtered = filterDebuggable(filtered);
             filtered = filterQuery(filtered);
 
-            final PackageManager pm = requireContext().getPackageManager();
             Comparator<PackageInfoCache> orderComparator = null;
             switch (mSharedPreferences.getInt(PREF_KEY_SORT_ORDER, SORT_ORDER_LABEL)) {
                 case SORT_ORDER_LABEL:
-                    orderComparator = (pkg1, pkg2) -> pkg1.getLabel(pm).toString().compareTo(pkg2.getLabel(pm).toString());
+                    orderComparator = Comparator.comparing(pkg -> pkg.getLabel(mPackageManager).toString());
                     break;
                 case SORT_ORDER_PACKAGE_NAME:
-                    orderComparator = (pkg1, pkg2) -> pkg1.getPackageName().compareTo(pkg2.getPackageName());
+                    orderComparator = Comparator.comparing(PackageInfoCache::getPackageName);
                     break;
                 case SORT_ORDER_INSTALL_TIME:
-                    orderComparator = (pkg1, pkg2) -> Long.compare(pkg1.getInstallTime(), pkg2.getInstallTime());
-                    orderComparator = orderComparator.reversed();
+                    orderComparator = Comparator.comparingLong(PackageInfoCache::getInstallTime).reversed();
                     break;
                 case SORT_ORDER_UPDATE_TIME:
-                    orderComparator = (pkg1, pkg2) -> Long.compare(pkg1.getUpdateTime(), pkg2.getUpdateTime());
-                    orderComparator = orderComparator.reversed();
+                    orderComparator = Comparator.comparingLong(PackageInfoCache::getUpdateTime).reversed();
                     break;
             }
 
@@ -334,11 +367,13 @@ public class AppsFragment extends Fragment {
             mFilteredPackages.addAll(filtered);
         }
 
-        private class ViewHolder extends RecyclerView.ViewHolder {
+        private static class ViewHolder extends RecyclerView.ViewHolder implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
             private final AppCompatImageView icon;
             private final AppCompatTextView applicationLabel;
             private final AppCompatTextView packageName;
             private final SwitchCompat toggle;
+
+            private PackageInfoCache pkg = null;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -346,28 +381,48 @@ public class AppsFragment extends Fragment {
                 applicationLabel = itemView.findViewById(R.id.application_label);
                 packageName = itemView.findViewById(R.id.package_name);
                 toggle = itemView.findViewById(R.id.toggle);
+
+                itemView.setOnClickListener(this);
             }
 
             public void bind(final PackageInfoCache pkg) {
-                final PackageManager pm = itemView.getContext().getPackageManager();
+                this.pkg = pkg;
+                final Context context = itemView.getContext();
+                final PackageManager pm = context.getPackageManager();
+
                 icon.setImageDrawable(pkg.getIcon(pm));
                 applicationLabel.setText(pkg.getLabel(pm));
+                applicationLabel.setTypeface(null, getTypeFace(pkg.isSystemApp(), pkg.isDebugApp()));
                 packageName.setText(pkg.getPackageName());
                 toggle.setOnCheckedChangeListener(null);
                 toggle.setChecked(Configuration.isEnabled(pkg.getPackageName()));
-                toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked)
-                        Configuration.add(pkg.getPackageName());
-                    else
-                        Configuration.remove(pkg.getPackageName());
-                    Snackbar snackbar = Snackbar.make(getView(), R.string.restart_required, LENGTH_SHORT);
-                    snackbar.setAction(R.string.dismiss, v -> snackbar.dismiss());
-                    snackbar.show();
-                });
+                toggle.setOnCheckedChangeListener(this);
+            }
 
-                final Context context = itemView.getContext();
-                final Resources resources = context.getResources();
-                itemView.setBackgroundColor(resources.getColor(pkg.isSystemApp() ? R.color.highlight : R.color.transparent, context.getTheme()));
+            @Override
+            public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+                if (isChecked)
+                    Configuration.add(pkg.getPackageName());
+                else
+                    Configuration.remove(pkg.getPackageName());
+                Snackbar snackbar = Snackbar.make(itemView, R.string.restart_required, LENGTH_SHORT);
+                snackbar.setAction(R.string.dismiss, v -> snackbar.dismiss());
+                snackbar.show();
+            }
+
+            @Override
+            public void onClick(View view) {
+                toggle.toggle();
+            }
+
+            private static int getTypeFace(boolean system, boolean debug) {
+                if (system && debug)
+                    return Typeface.BOLD_ITALIC;
+                if (system)
+                    return Typeface.BOLD;
+                if (debug)
+                    return Typeface.ITALIC;
+                return Typeface.NORMAL;
             }
         }
     }

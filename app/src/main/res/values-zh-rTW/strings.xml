@@ -24,6 +24,7 @@
     <string name="action_title_options">選項</string>
     <string name="action_debuggable_first">可除錯優先</string>
     <string name="action_show_system">顯示系統應用</string>
+    <string name="action_show_debug">顯示本就可除錯應用</string>
 
     <string name="restart_required">重啟該應用程式套用變更！</string>
     <string name="dismiss">朕知道了！</string>
