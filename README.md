@@ -2,18 +2,28 @@
 
 Debug any application of your choice!
 
-In recent version of Android (starting from... Nougut or Oreo I guess?),
-undebuggable apps won't show its name in the logcat view of Android Studio.
+In recent version of Android (starting from... Nougat or Oreo I guess?),
+un-debuggable apps won't show its name in the logcat view of Android Studio.
 
 This is somehow inconvenient since at some point we always have to build
 our apps with release configuration, which disables the debuggable flag and
 making life difficult.
 
+This xposed module allows you to toggle debuggable for any app you want.
+
 ## Features
 
 - Reasonable UI
-- Hooks **both** `Process.start()` **and** `PackageManagerService.getPackageInfo()`.
+- Hooks **both** `Process.start()` **and** 
+  `PackageManagerService.getPackageInfo()`.
 - Works with multi-user
+
+## Notes
+
+1. For users with EdXposed or LSPosed using "application scope", attach this
+   module to `android` system package.
+2. For users with Work profile, clone this app into your Work folder, and
+   toggle apps you want to debug there.
 
 ## Special Thanks
 
