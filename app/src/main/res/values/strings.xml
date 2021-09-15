@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">XAppDebug</string>
+    <string name="app_name">XAppDebug (Debug)</string>
     <string name="app_xposed_description">Make the apps you want to debug debuggable</string>
 
     <string name="title_activity_main">@string/app_name</string>

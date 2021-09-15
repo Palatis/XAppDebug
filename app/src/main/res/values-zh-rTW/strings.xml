@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">讓我抓蟲</string>
+    <string name="app_name">讓我抓蟲（除錯版）</string>
     <string name="app_xposed_description">讓你想抵霸誰就抵霸誰！</string>
 
     <string name="title_activity_main">@string/app_name</string>
