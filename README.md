@@ -22,8 +22,9 @@ This xposed module allows you to toggle debuggable for any app you want.
 
 1. For users with EdXposed or LSPosed using "application scope", attach this
    module to `android` system package.
-2. For users with Work profile, clone this app into your Work folder, and
-   toggle apps you want to debug there.
+2. For users with Work profile, install this all in **both** your Main profile
+   and Work profile. Attach to `android` package in your **Main** profile,
+   and tick the apps you want to debug in the according profile.
 
 ## Special Thanks
 
