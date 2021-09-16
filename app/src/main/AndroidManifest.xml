@@ -15,7 +15,7 @@
 
         <activity
             android:exported="true"
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
