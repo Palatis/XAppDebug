@@ -1,19 +1,18 @@
-package tw.idv.palatis.xappdebug.ui;
+package tw.idv.palatis.xappdebug.viewmodels;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class AppsViewModel extends ViewModel {
+import java.util.ArrayList;
+import java.util.List;
 
-    private MutableLiveData<List<PackageInfo>> mInstalledPackages = new MutableLiveData<>();
+public class AppsViewModel extends ViewModel {
+    private final MutableLiveData<List<PackageInfo>> mInstalledPackages = new MutableLiveData<>();
 
     public AppsViewModel() {
         mInstalledPackages.setValue(new ArrayList<>());
