@@ -168,6 +168,7 @@ public class AppsFragment extends Fragment {
                 case PREF_KEY_SORT_ORDER:
                 case PREF_KEY_SHOW_DEBUGGABLE_FIRST:
                 case PREF_KEY_SHOW_SYSTEM:
+                case PREF_KEY_SHOW_DEBUG:
                     filterAndSort();
                     notifyDataSetChanged();
                     break;
