@@ -14,8 +14,8 @@ android {
         applicationId "tw.idv.palatis.xappdebug"
         minSdkVersion 24
         targetSdkVersion 31
-        versionCode 100002
-        versionName "1.0.2"
+        versionCode 100003
+        versionName "1.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         project.ext.set("archivesBaseName", applicationId + "-" + versionName + "-" + versionCode)
