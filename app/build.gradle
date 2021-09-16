@@ -38,7 +38,35 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+}
 
+android.applicationVariants.all { variant ->
+    def version
+    if (variant.versionName != null && !variant.versionName.isEmpty())
+        version = "${variant.versionName}-${variant.versionCode}"
+    else
+        version = "${variant.versionCode}"
+
+    def archiveBuildTask = tasks.create(
+            name: "archive${variant.name.capitalize()}Apk",
+            type: Copy,
+            dependsOn: variant.assemble,
+    ) {
+        group 'archive'
+        description "Assembles and archives apk and its proguard mapping for the ${variant.name.capitalize()} build"
+
+        variant.outputs.all { output ->
+            from output.outputFile.path
+            rename "${output.outputFile.name}", "${applicationId}-${version}-${output.outputFile.name}"
+        }
+        if (variant.mappingFile != null) {
+            from variant.mappingFile.path
+            rename "${variant.mappingFile.name}", "${applicationId}-${version}-${variant.mappingFile.name}"
+        }
+
+        into "${rootDir}/archive/${project.name}/"
+    }
+    variant.assemble.finalizedBy archiveBuildTask
 }
 
 dependencies {

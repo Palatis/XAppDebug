@@ -73,3 +73,8 @@ lint/tmp/
 
 # release signing configs
 signing.gradle
+
+# build output
+archive/
+release/
+debug/
