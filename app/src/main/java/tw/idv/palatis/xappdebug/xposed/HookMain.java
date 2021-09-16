@@ -1,25 +1,28 @@
 package tw.idv.palatis.xappdebug.xposed;
 
-import android.annotation.SuppressLint;
-import android.content.pm.PackageInfo;
-import android.os.StrictMode;
-import android.os.UserHandle;
-
-import java.util.Locale;
-
-import androidx.annotation.Keep;
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.SELinuxHelper;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
-
 import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
 import static android.util.Log.getStackTraceString;
 import static de.robv.android.xposed.XposedBridge.hookAllMethods;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static tw.idv.palatis.xappdebug.Constants.CONFIG_PATH_FORMAT;
 import static tw.idv.palatis.xappdebug.Constants.LOG_TAG;
+
+import android.annotation.SuppressLint;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.os.StrictMode;
+import android.os.UserHandle;
+
+import androidx.annotation.Keep;
+
+import java.util.List;
+import java.util.Locale;
+
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.SELinuxHelper;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 @Keep
 public class HookMain implements IXposedHookLoadPackage {
@@ -28,13 +31,15 @@ public class HookMain implements IXposedHookLoadPackage {
     // https://android.googlesource.com/platform/frameworks/base.git/+/master/core/java/com/android/internal/os/Zygote.java
     private static final int DEBUG_ENABLE_JDWP = 1;
 
+    private static final String PACKAGE_MANAGER_SERVICE_CLASS = "com.android.server.pm.PackageManagerService";
+
     @Override
     public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         if (!"android".equals(lpparam.packageName))
             return;
 
         findAndHookMethod(
-                "com.android.server.pm.PackageManagerService",
+                PACKAGE_MANAGER_SERVICE_CLASS,
                 lpparam.classLoader,
                 "getPackageInfo",
                 String.class, int.class, int.class, /* packageName, flags, userId */
@@ -42,14 +47,59 @@ public class HookMain implements IXposedHookLoadPackage {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         try {
-                            final PackageInfo packageInfo = (PackageInfo) param.getResult();
+                            final int userId = (int) param.args[2];
+                            final PackageInfo info = (PackageInfo) param.getResult();
+                            if (info == null)
+                                return;
+                            if (!isDebuggable(info.packageName, userId))
+                                return;
+                            info.applicationInfo.flags |= FLAG_DEBUGGABLE;
+                        } catch (Exception e) {
+                            XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
+                        }
+                    }
+                }
+        );
 
-                            if (packageInfo != null) {
-                                if (!isDebuggable(packageInfo.packageName, (int) param.args[2]))
-                                    return;
+        findAndHookMethod(
+                PACKAGE_MANAGER_SERVICE_CLASS,
+                lpparam.classLoader,
+                "getApplicationInfo",
+                String.class, int.class, int.class, /* packageName, flags, userId */
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        try {
+                            final int userId = (int) param.args[2];
+                            final ApplicationInfo appInfo = (ApplicationInfo) param.getResult();
+                            if (appInfo == null)
+                                return;
+                            if (!isDebuggable(appInfo.packageName, userId))
+                                return;
+                            appInfo.flags |= FLAG_DEBUGGABLE;
+                        } catch (Exception e) {
+                            XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
+                        }
+                    }
+                }
+        );
 
-                                packageInfo.applicationInfo.flags |= FLAG_DEBUGGABLE;
-                                param.setResult(packageInfo);
+        findAndHookMethod(
+                PACKAGE_MANAGER_SERVICE_CLASS,
+                lpparam.classLoader,
+                "getInstalledApplicationsListInternal",
+                int.class, int.class, int.class, /* flags, userId, callingUid */
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        try {
+                            final int userId = (int) param.args[1];
+                            final List<ApplicationInfo> infos = (List<ApplicationInfo>) param.getResult();
+                            if (infos == null)
+                                return;
+                            for (ApplicationInfo info : infos) {
+                                if (isDebuggable(info.packageName, userId))
+                                    info.flags |= FLAG_DEBUGGABLE;
                             }
                         } catch (Exception e) {
                             XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
