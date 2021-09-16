@@ -70,3 +70,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# release signing configs
+signing.gradle

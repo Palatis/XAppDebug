@@ -1,15 +1,12 @@
 apply plugin: 'com.android.application'
 
-android {
-    signingConfigs {
-        release {
-            storeFile file(STORE_FILE)
-            storePassword STORE_PASSWORD
-            keyAlias KEY_ALIAS
-            keyPassword KEY_PASSWORD
-        }
-    }
+if (file('signing.gradle').exists()) {
+    apply from: 'signing.gradle'
+} else {
+    println 'signing.gradle is missing'
+}
 
+android {
     compileSdkVersion 31
     buildToolsVersion "30.0.2"
 
@@ -25,6 +22,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-dbg"
+        }
         release {
             signingConfig signingConfigs.release
             aaptOptions.cruncherEnabled = true
