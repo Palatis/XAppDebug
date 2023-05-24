@@ -11,15 +11,15 @@ android {
     dataBinding {
         enabled true
     }
-    compileSdkVersion 31
+    compileSdkVersion 33
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "tw.idv.palatis.xappdebug"
         minSdkVersion 24
-        targetSdkVersion 31
-        versionCode 100005
-        versionName "1.0.5"
+        targetSdkVersion 33
+        versionCode 100006
+        versionName "1.0.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         project.ext.set("archivesBaseName", applicationId + "-" + versionName + "-" + versionCode)
@@ -31,8 +31,8 @@ android {
             versionNameSuffix "-dbg"
         }
         release {
-            signingConfig signingConfigs.release
-            aaptOptions.cruncherEnabled = true
+//            signingConfig signingConfigs.release
+//            aaptOptions.cruncherEnabled = true
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
