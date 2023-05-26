@@ -30,8 +30,9 @@ android {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.6.0'
-    annotationProcessor 'dev.rikka.tools.refine:annotation-processor:3.0.3'
-    compileOnly 'dev.rikka.tools.refine:annotation:3.0.3'
+
+    annotationProcessor 'dev.rikka.tools.refine:annotation-processor:4.3.0'
+    compileOnly 'dev.rikka.tools.refine:annotation:4.3.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
