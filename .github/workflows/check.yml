@@ -36,7 +36,6 @@ jobs:
       run: |
         for FILE in archive/app/*unsigned-signed.apk
         do
-          echo "${FILE} -> ${FILE/unsigned-signed/signed}"
           mv "${FILE}" "${FILE/unsigned-signed/signed}"
         done
     - name: Upload
@@ -44,5 +43,14 @@ jobs:
       with:
         name: Build Artifacts
         path: |
+          archive/app/*-signed.apk
+          archive/app/*-mapping.txt
+    - name: Release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: "latest"
+        prerelease: true
+        files: |
           archive/app/*-signed.apk
           archive/app/*-mapping.txt
