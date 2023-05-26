@@ -1,11 +1,32 @@
 apply plugin: 'com.android.application'
 apply plugin: 'dev.rikka.tools.refine.gradle-plugin'
 
-if (file('signing.gradle').exists()) {
-    apply from: 'signing.gradle'
-} else {
-    println 'signing.gradle is missing'
-}
+android {
+    signingConfigs {
+        release {
+            // for custom release signing keys
+            // 1. create `tw.idv.palatis.XAppDebug.signing.properties` under `~/.gradle`
+            // 2. populate with these values:
+            //   - STORE_FILE=/path/to/keystore.jks
+            //   - STORE_PASSWORD=super_secret_password
+            //   - KEY_ALIAS=your key alias
+            //   - KEY_PASSWORD=super_secret_password
+
+            def propsPath = System.getProperty("user.home") + "/.gradle/tw.idv.palatis.XAppDebug.signing.properties"
+            def propsFile = file(propsPath)
+            if (propsFile.canRead()) {
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+
+                storeFile file(props['STORE_FILE'])
+                storePassword props['STORE_PASSWORD']
+                keyAlias props['KEY_ALIAS']
+                keyPassword props['KEY_PASSWORD']
+            } else {
+                println "${propsPath} is missing"
+            }
+        }
+    }
 
     lintOptions {
         checkReleaseBuilds false
@@ -35,7 +56,8 @@ if (file('signing.gradle').exists()) {
             versionNameSuffix "-dbg"
         }
         release {
-            signingConfig signingConfigs.release
+            if (signingConfigs.release.storeFile != null)
+                signingConfig signingConfigs.release
             aaptOptions.cruncherEnabled = true
             shrinkResources true
             minifyEnabled true
