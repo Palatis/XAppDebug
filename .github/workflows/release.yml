@@ -45,12 +45,9 @@ jobs:
           archive/app/*-mapping.txt
     - name: Release
       uses: marvinpinto/action-automatic-releases@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        prerelease: true
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        prerelease: false
         files: |
           archive/app/*-signed.apk
           archive/app/*-mapping.txt
