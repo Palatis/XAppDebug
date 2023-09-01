@@ -1,2 +1,3 @@
 tw.idv.palatis.xappdebug.xposed.HookMain
 tw.idv.palatis.xappdebug.xposed.HookSelf
+tw.idv.palatis.xappdebug.xposed.HookDebugger
