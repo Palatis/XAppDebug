@@ -18,6 +18,18 @@ This xposed module allows you to toggle debuggable for any app you want.
   `PackageManagerService.getPackageInfo()`.
 - Works with multi-user
 
+## How it works?
+This module inject hooks to the `android` system package, and tricks the system
+think another package is build with `debuggable` option.
+
+## Usage
+1. Enable `XAppDebug` (this module) in your xposed framework settings app
+2. Hook the `android` system package if any varient of "application scope"
+ is enabled. **DO NOT HOOK THE INDIVIDUAL PACKAGE YOU WANT TO DEBUG**
+3. Launch `XAppDebug` UI, select the app you want to debug
+4. kill and restart the victim app
+5. Enjoy!
+
 ## Notes
 
 1. For users with EdXposed or LSPosed using "application scope", attach this
