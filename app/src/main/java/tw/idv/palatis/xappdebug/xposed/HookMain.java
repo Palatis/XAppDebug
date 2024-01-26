@@ -57,8 +57,9 @@ public class HookMain implements IXposedHookLoadPackage {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         try {
-                            if (((PackageInfo) param.getResult()).applicationInfo != null)
-                                checkAndMakeDebuggable(((PackageInfo) param.getResult()).applicationInfo, ((PackageInfo) param.getResult()).packageName, (int) param.args[2]);
+                            PackageInfo packageInfo = (PackageInfo) param.getResult();
+                            if (packageInfo != null && packageInfo.applicationInfo != null)
+                                checkAndMakeDebuggable(packageInfo.applicationInfo, packageInfo.packageName, (int) param.args[2]);
                         } catch (Exception e) {
                             XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
                         }
@@ -137,8 +138,9 @@ public class HookMain implements IXposedHookLoadPackage {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         try {
-                            if (((PackageInfo) param.getResult()).applicationInfo != null)
-                                checkAndMakeDebuggable(((PackageInfo) param.getResult()).applicationInfo, ((PackageInfo) param.getResult()).packageName, (int) param.args[2]);
+                            PackageInfo packageInfo = (PackageInfo) param.getResult();
+                            if (packageInfo != null && packageInfo.applicationInfo != null)
+                                checkAndMakeDebuggable(packageInfo.applicationInfo, packageInfo.packageName, (int) param.args[2]);
                         } catch (Exception e) {
                             XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
                         }
