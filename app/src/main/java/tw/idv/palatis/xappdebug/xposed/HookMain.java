@@ -78,7 +78,7 @@ public class HookMain implements IXposedHookLoadPackage {
                         try {
                             ApplicationInfo appInfo = (ApplicationInfo) param.getResult();
                             if (appInfo != null)
-                                checkAndMakeDebuggable(appInfo, ((ApplicationInfo) param.getResult()).packageName, (int) param.args[2]);
+                                checkAndMakeDebuggable(appInfo, appInfo.packageName, (int) param.args[2]);
                         } catch (Exception e) {
                             XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
                         }
@@ -86,11 +86,10 @@ public class HookMain implements IXposedHookLoadPackage {
                 }
         );
 
-        findAndHookMethod(
-                PM_CLASS,
-                lpparam.classLoader,
+        try {
+            hookAllMethods(
+                lpparam.classLoader.loadClass(PM_CLASS),
                 "getInstalledApplications",
-                long.class, int.class, int.class, /* flags, userId, callingUid */
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -106,7 +105,10 @@ public class HookMain implements IXposedHookLoadPackage {
                         }
                     }
                 }
-        );
+            );
+        } catch (Exception e) {
+            XposedBridge.log(LOG_TAG + ": " + getStackTraceString(e));
+        }
 
         hookAllMethods(
                 Process.class,
